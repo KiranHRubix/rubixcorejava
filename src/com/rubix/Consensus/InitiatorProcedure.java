@@ -42,7 +42,7 @@ public class InitiatorProcedure {
 
         JSONObject dataObject = new JSONObject(data);
         String tid = dataObject.getString("tid");
-        String message = dataObject.getString("message");
+        String senderPayloadHash = dataObject.getString("senderPayloadHash");
         String receiverDidIpfs = dataObject.getString("receiverDidIpfs");
         String pvt = dataObject.getString("pvt");
         String senderDidIpfs = dataObject.getString("senderDidIpfs");
@@ -50,9 +50,9 @@ public class InitiatorProcedure {
         JSONArray alphaList = dataObject.getJSONArray("alphaList");
         JSONArray betaList = dataObject.getJSONArray("betaList");
         JSONArray gammaList = dataObject.getJSONArray("gammaList");
+        String senderPayloadSign = dataObject.getString("senderPayloadSign");
 
-        String authSenderByQuorumHash = calculateHash(message, "SHA3-256");
-        String authQuorumHash = calculateHash(authSenderByQuorumHash.concat(receiverDidIpfs), "SHA3-256");
+        String authQuorumHash = calculateHash(senderPayloadHash.concat(receiverDidIpfs), "SHA3-256");
 
         try {
             payload.put("sender", senderDidIpfs);
@@ -76,11 +76,10 @@ public class InitiatorProcedure {
         JSONObject data1 = new JSONObject();
         JSONObject data2 = new JSONObject();
         try {
-            senderSignQ = getSignFromShares(pvt, authSenderByQuorumHash);
             data1.put("sign", senderSignQ);
             data1.put("senderDID", senderDidIpfs);
             data1.put(ConsensusConstants.TRANSACTION_ID, tid);
-            data1.put(ConsensusConstants.HASH, authSenderByQuorumHash);
+            data1.put(ConsensusConstants.HASH, senderPayloadSign);
             data1.put(ConsensusConstants.RECEIVERID, receiverDidIpfs);
             data1.put(ConsensusConstants.INIT_HASH, initHash());
 
@@ -88,7 +87,7 @@ public class InitiatorProcedure {
             data2.put("Share2", Q2Share);
             data2.put("Share3", Q3Share);
             data2.put("Share4", Q4Share);
-        } catch (JSONException | IOException e) {
+        } catch (JSONException e) {
             InitiatorProcedureLogger.error("JSON Exception occurred", e);
             e.printStackTrace();
         }

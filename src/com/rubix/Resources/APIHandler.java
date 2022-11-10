@@ -92,7 +92,7 @@ public class APIHandler {
         }
 
         dataObject.put("pvt", DATA_PATH + senDID + "/PrivateShare.png");
-        sendMessage = TokenSender.Send(dataObject.toString(), ipfs, SEND_PORT);
+        sendMessage = TokenSender.SendPartA(dataObject.toString(), ipfs, SEND_PORT);
 
         APILogger.info(sendMessage);
         return sendMessage;
