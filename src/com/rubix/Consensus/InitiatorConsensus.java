@@ -15,7 +15,7 @@ import static com.rubix.Resources.IPFSNetwork.swarmConnectP2P;
 
 import static com.rubix.Resources.Functions.*;
 import static com.rubix.NFTResources.NFTFunctions.*;
-import static com.rubix.Resources.APIHandler.getPubKeyIpfsHash_DIDserver;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -458,68 +458,47 @@ public class InitiatorConsensus {
                                         qOut[j].println("null");
                                         IPFSNetwork.executeIPFSCommands("ipfs p2p close -t /p2p/" + quorumID[j]);
                                     } else {
-
-                                        JSONObject quorum_signs = new JSONObject(qResponse[j]);
-                                        String quorumsPrivateShareSign = quorum_signs.getString("privateShareSign");
-                                        String quorumsPrivateKeySign = quorum_signs.getString("privateKeySign");
-
-                                        String didHash = getValues(DATA_PATH + "DataTable.json", "didHash", "peerid",quorumID[j]);
-                                        InitiatorConsensusLogger.debug("DID obtained for this quorum member : "+ didHash);
-
-                                        String QuorumPublicKeyIpfsHash = getPubKeyIpfsHash_DIDserver(didHash,2); //get public key ipfs hash of the quorum member.
-                                        InitiatorConsensusLogger.debug("Quorum's pub key ipfs hash : "+QuorumPublicKeyIpfsHash);
-
-                                        String quorumPubKeyStr= IPFSNetwork.get(QuorumPublicKeyIpfsHash, ipfs); // get quorum member's public key from ipfs.
-
-                                        String pubKeyAlgo = publicKeyAlgStr(quorumPubKeyStr);
-                
-                                        
+                                        String didHash = getValues(DATA_PATH + "DataTable.json", "didHash", "peerid",
+                                                quorumID[j]);
                                         JSONObject detailsToVerify = new JSONObject();
                                         detailsToVerify.put("did", didHash);
                                         detailsToVerify.put("hash", hash);
-                                        detailsToVerify.put("signature", quorumsPrivateShareSign);
-                                        
-                                        if ((verifySignature(quorumsPrivateShareSign,getPubKeyFromStr(quorumPubKeyStr,pubKeyAlgo),quorumsPrivateKeySign,pubKeyAlgo))){ 
-
-                                            InitiatorConsensusLogger.debug("Private key sign verified of the quorum member."+ quorumID[j]);
-
-                                            if ((Authenticate.verifySignature(detailsToVerify.toString()))) {
+                                        detailsToVerify.put("signature", qResponse[j]);
+                                        if (Authenticate.verifySignature(detailsToVerify.toString())) {
+                                            InitiatorConsensusLogger
+                                                    .debug(role + " node authenticated at index " + index);
+                                            boolean voteStatus = voteNCount(index, quorumSize);
+                                            if (quorumResponse[index] <= minQuorum(quorumSize) && voteStatus) {
                                                 InitiatorConsensusLogger
-                                                        .debug(role + " node authenticated at index " + index);
-                                                boolean voteStatus = voteNCount(index, quorumSize);
-                                                if (quorumResponse[index] <= minQuorum(quorumSize) && voteStatus) {
+                                                        .debug("waiting for  " + quorumSize + " +signs " + role);
+                                                if (role.equals("alpha")) {
                                                     InitiatorConsensusLogger
-                                                            .debug("waiting for  " + quorumSize + " +signs " + role);
-                                                    if (role.equals("alpha")) {
-                                                        InitiatorConsensusLogger
-                                                                .debug("Picking Quorum for Staking " + quorumID[j]);
-                                                        signedAphaQuorumArray.put(quorumID[j]);
-                                                    }
-                                                    while (quorumResponse[index] < minQuorum(quorumSize)) {
-                                                    }
-                                                    InitiatorConsensusLogger
-                                                            .debug("between Q1- to Q" + quorumSize + " for index " + index);
-                                                    quorumSign(didHash, hash, quorumsPrivateShareSign, quorumsPrivateKeySign, index, quorumSize, alphaSize);
-                                                    quorumWithShares.add(quorumPeersObject.getString(j));
-                                                    while (quorumSignature
-                                                            .length() < (minQuorum(alphaSize) + 2 * minQuorum(7))) {
-                                                    }
-                                                    InitiatorConsensusLogger.debug("sending Qsign  of length "
-                                                            + quorumSignature.length() + "at index " + index);
-                                                    qOut[j].println(finalQuorumSignsArray.toString());
-                                                    IPFSNetwork
-                                                            .executeIPFSCommands("ipfs p2p close -t /p2p/" + quorumID[j]);
-                                                } else {
-                                                    InitiatorConsensusLogger.debug("sending null for slow quorum ");
-                                                    qOut[j].println("null");
-                                                    IPFSNetwork
-                                                            .executeIPFSCommands("ipfs p2p close -t /p2p/" + quorumID[j]);
+                                                            .debug("Picking Quorum for Staking " + quorumID[j]);
+                                                    signedAphaQuorumArray.put(quorumID[j]);
                                                 }
-                                                InitiatorConsensusLogger.debug("Quorum Count : " + quorumResponse
-                                                        + "Signature count : " + quorumSignature.length());
-                                       } 
-                                    }else {
-                                            InitiatorConsensusLogger.debug("Private key sign verification failed of the quorum member.");
+                                                while (quorumResponse[index] < minQuorum(quorumSize)) {
+                                                }
+                                                InitiatorConsensusLogger
+                                                        .debug("between Q1- to Q" + quorumSize + " for index " + index);
+                                                quorumSign(didHash, hash, qResponse[j],"",index, quorumSize, alphaSize);
+                                                quorumWithShares.add(quorumPeersObject.getString(j));
+                                                while (quorumSignature
+                                                        .length() < (minQuorum(alphaSize) + 2 * minQuorum(7))) {
+                                                }
+                                                InitiatorConsensusLogger.debug("sending Qsign  of length "
+                                                        + quorumSignature.length() + "at index " + index);
+                                                qOut[j].println(finalQuorumSignsArray.toString());
+                                                IPFSNetwork
+                                                        .executeIPFSCommands("ipfs p2p close -t /p2p/" + quorumID[j]);
+                                            } else {
+                                                InitiatorConsensusLogger.debug("sending null for slow quorum ");
+                                                qOut[j].println("null");
+                                                IPFSNetwork
+                                                        .executeIPFSCommands("ipfs p2p close -t /p2p/" + quorumID[j]);
+                                            }
+                                            InitiatorConsensusLogger.debug("Quorum Count : " + quorumResponse
+                                                    + "Signature count : " + quorumSignature.length());
+                                        } else {
                                             InitiatorConsensusLogger
                                                     .debug("node failed authentication with index " + index
                                                             + " with role " + role + " with did " + didHash
