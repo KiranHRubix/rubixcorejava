@@ -9,14 +9,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.json.JsonArray;
 
 import java.security.*;
 
@@ -151,72 +148,6 @@ public class NFTFunctions {
         return resultObject.toString();
 
     }
-
-    /**
-     * This method is used to create RAC tokens
-     *
-     * @param racType,DID,totalsupply,contenthash,url,comment,privatkeypass as
-     *                                                                      String
-     * @return JSONArray of RAC tokens
-     */
-    /* public static String createRacToken(String data) {
-        pathSet();
-        nftPathSet();
-        JSONArray resultTokenArray = new JSONArray();
-        JSONObject resultObject = new JSONObject();
-        try {
-            JSONObject apiData = new JSONObject(data);
-            String keyPass = apiData.getString("pvtKeyPass");
-            String DID = apiData.getString("creatorDid");
-            PrivateKey pvtKey;
-
-            if (apiData.has("pvtKeyStr") && apiData.getString("pvtKeyStr") != null) {
-                pvtKey = getPvtKeyFromStr(apiData.getString("pvtKeyStr"), keyPass);
-                apiData.remove("pvtKeyStr");
-            } else {
-                pvtKey = getPvtKey(keyPass);
-            }
-            apiData.remove("pvtKeyPass");
-            
-
-            long totalSupply = apiData.getLong("totalSupply");
-            for (long i = 1; i <= totalSupply; i++) {
-                apiData.put("tokenCount", i);
-                String pvtKeySign = pvtKeySign(apiData.toString(), pvtKey);
-                apiData.put("pvtKeySign", pvtKeySign);
-
-                writeToFile(LOGGER_PATH + "TempRACFile", apiData.toString(), false);
-                String racToken = IPFSNetwork.add(LOGGER_PATH + "TempRACFile", ipfs);
-
-                writeToFile(NFT_TOKENS_PATH + racToken, apiData.toString(), false);
-
-                writeToFile(NFT_TOKENCHAIN_PATH + racToken + ".json", "[]", false);
-
-                deleteFile(LOGGER_PATH + "TempRACFile");
-
-                resultTokenArray.put(racToken);
-
-                IPFSNetwork.pin(racToken, ipfs);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            if (resultTokenArray.length() == 0) {
-                resultObject.put("Status", "Failed");
-                resultObject.put("Tokens", resultTokenArray);
-                resultObject.put("Message", "RAC tokens not created");
-
-            } else {
-                resultObject.put("Status", "Success");
-                resultObject.put("Tokens", resultTokenArray);
-                resultObject.put("Message", "RAC tokens created");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return resultObject.toString();
-    } */
 
     /**
      * This method is used to get decoded private key from .pem file
