@@ -10,7 +10,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.rubix.KeyPairGen.EcDSAKeyGen;
-import com.rubix.KeyPairGen.RsaKeyGen;
 import com.rubix.Resources.IPFSNetwork;
 
 import static com.rubix.NFTResources.NFTFunctions.*;
@@ -380,26 +379,7 @@ public class NFTAPIHandler {
             } else {
                 result = EcDSAKeyGen.genAndRetKey(password);
             }
-        } else {
-            if (returnKey == 0) {
-                RsaKeyGen.generateKeyPair(password);
-                if (checkKeyFiles()) {
-                    JSONObject temp = new JSONObject();
-                    try {
-                        temp.put("privateKey", "RSA key saved to Rubix/DATA/privatekey.pem");
-                        temp.put("publicKey", "RSA key saved to Rubix/DATA/publickey.pub");
-                        temp.put("publicKeyIpfsHash", "saved to Rubix/DATA/PulicKeyIpfsHash");
-                    } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    result = temp.toString();
-
-                }
-            } else {
-                result = RsaKeyGen.genAndRetKey(password);
-            }
-        }
+        } 
 
         return result;
 
