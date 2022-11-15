@@ -856,11 +856,12 @@ public class NftBuyer {
             rbtCon.setRequestProperty("Content-Type", "application/json");
             rbtCon.setRequestProperty("Authorization", "null");
 
+            String rbtTxnComment= comment.concat(tid);
             // Serialization
             JSONObject rbtApiPayload = new JSONObject();
             rbtApiPayload.put("receiver", sellerDid);
             rbtApiPayload.put("tokenCount", requestedAmount);
-            rbtApiPayload.put("comment", comment);
+            rbtApiPayload.put("comment", rbtTxnComment);
             rbtApiPayload.put("type", 2);
 
             // Send post request
