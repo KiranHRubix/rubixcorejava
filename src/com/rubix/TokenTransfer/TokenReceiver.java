@@ -82,7 +82,8 @@ public class TokenReceiver {
 			}
 
 			int quorumSignVerifyCount = 0;
-			JSONObject quorumSignatures = null;
+			JSONArray quorumSignatures = null;
+			JSONArray signedQuorumList = new JSONArray();
 
 			ArrayList<String> quorumDID = new ArrayList<>();
 			PropertyConfigurator.configure(LOGGER_PATH + "log4jWallet.properties");
@@ -833,11 +834,11 @@ public class TokenReceiver {
 			if (!Status.equals("Consensus Failed")) {
 				boolean yesQuorum = false;
 				if (Status.equals("Consensus Reached")) {
-					quorumSignatures = new JSONObject(QuorumDetails);
+					quorumSignatures = new JSONArray(QuorumDetails);
 					String selectQuorumHash = calculateHash(senderToken, "SHA3-256");
 					String verifyQuorumHash = calculateHash(selectQuorumHash.concat(receiverDidIpfsHash), "SHA3-256");
 
-					Iterator<String> keys = quorumSignatures.keys();
+					/* Iterator<String> keys = quorumSignatures.keys();
 					while (keys.hasNext()) {
 						String key = keys.next();
 						quorumDID.add(key);
@@ -849,17 +850,37 @@ public class TokenReceiver {
 								quorumDidIpfsHash);
 
 						nodeData(quorumDidIpfsHash, quorumWidIpfsHash, ipfs);
+					} */
+
+					
+					for (int i = 0; i < quorumSignatures.length(); i++) {
+
+						JSONObject QuorumMember = quorumSignatures.getJSONObject(i);
+						signedQuorumList.put(QuorumMember.getString("quorum_did"));
+						syncDataTable(QuorumMember.getString("quorum_did"), null);
+						String quorumWidIpfsHash = getValues(DATA_PATH + "DataTable.json", "walletHash", "didHash",
+								QuorumMember.getString("quorum_did"));
+						String quorumPid = getValues(DATA_PATH + "DataTable.json", "peerid", "didHash",
+								QuorumMember.getString("quorum_did"));
+						bootstrapConnect(quorumPid, ipfs);
+
+						nodeData((QuorumMember.getString("quorum_did")), quorumWidIpfsHash, ipfs);
 					}
 
 					for (int i = 0; i < quorumSignatures.length(); i++) {
 
+						JSONObject quorumMember = quorumSignatures.getJSONObject(i);
+
 						JSONObject detailsForVerify = new JSONObject();
-						detailsForVerify.put("did", quorumDID.get(i));
+						detailsForVerify.put("did",quorumMember.getString("quorum_did") );
 						detailsForVerify.put("hash", verifyQuorumHash);
-						detailsForVerify.put("signature", quorumSignatures.getString(quorumDID.get(i)));
-						boolean val = Authenticate.verifySignature(detailsForVerify.toString());
-						if (val)
+						detailsForVerify.put("signature",quorumMember.getString("quorumPrivateShareSign"));
+
+						boolean val = ((Authenticate.verifySignature(detailsForVerify.toString())));
+						if (val){
 							quorumSignVerifyCount++;
+							TokenReceiverLogger.debug("Quorum member " +quorumMember.getString("quorum_did") + " verified.");
+						}
 					}
 					TokenReceiverLogger.debug("Verified Quorum Count " + quorumSignVerifyCount);
 					yesQuorum = quorumSignVerifyCount >= quorumSignatures.length();
@@ -1088,11 +1109,13 @@ public class TokenReceiver {
 							}
 						}
 
+						
+
 						JSONObject transactionRecord = new JSONObject();
 						transactionRecord.put("role", "Receiver");
 						transactionRecord.put("tokens", allTokens);
 						transactionRecord.put("txn", tid);
-						transactionRecord.put("quorumList", quorumSignatures.keys());
+						transactionRecord.put("quorumList", signedQuorumList);
 						transactionRecord.put("senderDID", senderDidIpfsHash);
 						transactionRecord.put("receiverDID", receiverDidIpfsHash);
 						transactionRecord.put("Date", getCurrentUtcTime());
