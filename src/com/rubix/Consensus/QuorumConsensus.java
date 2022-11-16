@@ -101,7 +101,7 @@ public class QuorumConsensus implements Runnable {
     public void run() {
         while (true) {
             PropertyConfigurator.configure(LOGGER_PATH + "log4jWallet.properties");
-            String peerID, transactionID, verifySenderHash="", receiverDID, appName, senderPrivatePos,
+            String peerID, transactionID, verifySenderHash = "", receiverDID, appName, senderPrivatePos,
                     senderDidIpfsHash = "", senderPID = "", ownerHash = "", initHash = "", blockHashString = "";
             ServerSocket serverSocket = null;
             Socket socket = null;
@@ -132,7 +132,6 @@ public class QuorumConsensus implements Runnable {
                     serverSocket.close();
                     executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
                 }
-                
 
                 // ? staking logic starts here
                 if (operation.equals("new-credits-mining")) {
@@ -226,7 +225,7 @@ public class QuorumConsensus implements Runnable {
                                 if (hashSet.size() == qstArray.length() * 15) {
                                     QuorumConsensusLogger.debug("Mining Verified");
                                     out.println("Verified");
-                                   
+
                                 } else {
                                     QuorumConsensusLogger
                                             .debug("HashSet: " + hashSet.size() + " QST Size " + qstArray.length());
@@ -254,8 +253,7 @@ public class QuorumConsensus implements Runnable {
                         serverSocket.close();
                         executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
                     }
-                } 
-                else if (operation.equals("alpha-stake-token")) {
+                } else if (operation.equals("alpha-stake-token")) {
 
                     QuorumConsensusLogger.debug("Staking 1 RBT for incoming mining transaction...");
                     String response = null;
@@ -382,32 +380,35 @@ public class QuorumConsensus implements Runnable {
 
                                     String tokenChain = readFile(TOKENCHAIN_PATH + stakedTokenHash + ".json");
                                     stakedTokenChainArray = new JSONArray(tokenChain);
-                                    
-                                    if(stakedTokenChainArray.length() > 0) {
-                                   	 // get last object of tokenchainarray
-                                       JSONObject lastTokenChainObject = stakedTokenChainArray
-                                               .getJSONObject(stakedTokenChainArray.length() - 1);
 
-                                       if (!lastTokenChainObject.has(MINE_ID)) {
-                                           // && stakedTokenChainArray.length() > tokenLevelValue
+                                    if (stakedTokenChainArray.length() > 0) {
+                                        // get last object of tokenchainarray
+                                        JSONObject lastTokenChainObject = stakedTokenChainArray
+                                                .getJSONObject(stakedTokenChainArray.length() - 1);
 
-                                           QuorumConsensusLogger.debug("Staking 1 RBT for incoming mining transaction...");
-                                           tokenToStake.put(stakedTokenHash);
-                                           tokenToStake.put(stakedTokenChainArray);
+                                        if (!lastTokenChainObject.has(MINE_ID)) {
+                                            // && stakedTokenChainArray.length() > tokenLevelValue
 
-                                           bankArray.remove(i);
-                                           bankArray.put(bankObject);
-                                           writeToFile(PAYMENTS_PATH.concat("BNK00.json"), bankArray.toString(), false);
+                                            QuorumConsensusLogger
+                                                    .debug("Staking 1 RBT for incoming mining transaction...");
+                                            tokenToStake.put(stakedTokenHash);
+                                            tokenToStake.put(stakedTokenChainArray);
 
-                                           tokenAvailableToStake = true;
+                                            bankArray.remove(i);
+                                            bankArray.put(bankObject);
+                                            writeToFile(PAYMENTS_PATH.concat("BNK00.json"), bankArray.toString(),
+                                                    false);
 
-                                           break;
-                                       }
-                                     
-                                   } else {
-                                	  
-                                   		QuorumConsensusLogger.debug("Token Chain does not have enough height to pledge...Trying to pledge with another token!");
-                                   }
+                                            tokenAvailableToStake = true;
+
+                                            break;
+                                        }
+
+                                    } else {
+
+                                        QuorumConsensusLogger.debug(
+                                                "Token Chain does not have enough height to pledge...Trying to pledge with another token!");
+                                    }
                                 }
                             }
 
@@ -499,10 +500,9 @@ public class QuorumConsensus implements Runnable {
                                             stakedTokenChainArray.toString(),
                                             false);
 
-                                 
                                     out.println(stakingSigns.toString());
                                     QuorumConsensusLogger.debug("Staking Completed!");
-                                  
+
                                     socket.close();
                                     serverSocket.close();
                                     executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
@@ -537,7 +537,7 @@ public class QuorumConsensus implements Runnable {
                         serverSocket.close();
                         executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
                     }
-                }  else if (operation.equals("NFT")) {
+                } else if (operation.equals("NFT")) {
                     String quorumHash = null, nftQuorumHash = null;
                     String nftDetails = null;
                     try {
@@ -557,28 +557,30 @@ public class QuorumConsensus implements Runnable {
 
                         String saleSignature = saleContractObject.getString("sign");
 
-                        /* JSONObject data1 = new JSONObject();
-                        data1.put("sellerDID",
-                                nftDetailsObject.getJSONObject("nftTokenDetails").getString("sellerDid"));
-                        data1.put("nftToken", nftDetailsObject.getJSONObject("nftTokenDetails").getString("nftToken"));
-                        data1.put("rbtAmount", nftDetailsObject.getDouble("tokenAmount")); */
+                        /*
+                         * JSONObject data1 = new JSONObject();
+                         * data1.put("sellerDID",
+                         * nftDetailsObject.getJSONObject("nftTokenDetails").getString("sellerDid"));
+                         * data1.put("nftToken",
+                         * nftDetailsObject.getJSONObject("nftTokenDetails").getString("nftToken"));
+                         * data1.put("rbtAmount", nftDetailsObject.getDouble("tokenAmount"));
+                         */
 
-                        //creating new temp jsonobject to use verify sale contract
+                        // creating new temp jsonobject to use verify sale contract
                         JSONObject saleDataObj = new JSONObject(saleContractContent);
                         saleDataObj.remove("sign");
 
-                        
-                        String pubKeyStr =get(nftDetailsObject.getString("sellerPubKeyIpfsHash"), ipfs);
+                        String pubKeyStr = get(nftDetailsObject.getString("sellerPubKeyIpfsHash"), ipfs);
                         String pubKeyAlgorithm = publicKeyAlgStr(pubKeyStr);
-                        PublicKey pubKey = getPubKeyFromStr(pubKeyStr,pubKeyAlgorithm);
+                        PublicKey pubKey = getPubKeyFromStr(pubKeyStr, pubKeyAlgorithm);
 
-                        QuorumConsensusLogger.debug("Recreated String to verify nft Signture " + saleDataObj.toString());
+                        QuorumConsensusLogger
+                                .debug("Recreated String to verify nft Signture " + saleDataObj.toString());
                         QuorumConsensusLogger
                                 .debug("Contents of SaleContract fetched from ipfs " + saleContractObject.toString());
                         QuorumConsensusLogger.debug("Signature contained inside the saleContract" + saleSignature);
                         QuorumConsensusLogger.debug(
                                 "seller Public Key ipfs hash" + nftDetailsObject.getString("sellerPubKeyIpfsHash"));
-
 
                         String verifyNftSenderHash = nftDetailsObject.getString("nftHash");
                         // data to verify nftbuyer
@@ -587,25 +589,23 @@ public class QuorumConsensus implements Runnable {
                         detailsToVerify.put("hash", verifyNftSenderHash);
                         detailsToVerify.put("signature", nftDetailsObject.getString("nftSign"));
 
-
-                        if(Authenticate.verifySignature(detailsToVerify.toString()))
-                        {
+                        if (Authenticate.verifySignature(detailsToVerify.toString())) {
                             QuorumConsensusLogger.debug("Quorum Authenticated NFT Buyer");
                             out.println("Buyer_verified");
                         }
 
-                        /* if (verifySignature(saleDataObj.toString(), pubKey, saleSignature)) {
-                            QuorumConsensusLogger.debug("Quorom Authenticated NFT sale contract");
-                            out.println("Contract_verified");
-
-                        } */ else {
+                        /*
+                         * if (verifySignature(saleDataObj.toString(), pubKey, saleSignature)) {
+                         * QuorumConsensusLogger.debug("Quorom Authenticated NFT sale contract");
+                         * out.println("Contract_verified");
+                         * 
+                         * }
+                         */ else {
                             QuorumConsensusLogger.debug("NFT Buyer Authentication Failure - Quorum");
                             out.println("Buyer_Not_Verified");
                         }
 
-                        
-
-                        if (verifySignature(saleDataObj.toString(), pubKey, saleSignature,pubKeyAlgorithm)) {
+                        if (verifySignature(saleDataObj.toString(), pubKey, saleSignature, pubKeyAlgorithm)) {
                             QuorumConsensusLogger.debug("Quorom Authenticated Sender NFT Signature");
 
                             nftQuorumHash = calculateHash(
@@ -644,9 +644,9 @@ public class QuorumConsensus implements Runnable {
                                 QuorumConsensusLogger.debug("Credit Hash: " + calculateHash(credit, "SHA3-256"));
                                 JSONObject storeDetailsQuorum = new JSONObject();
                                 storeDetailsQuorum.put("tid", nftDetailsObject.getString("tid"));
-                                //modified consensus id got for nftTxn
+                                // modified consensus id got for nftTxn
                                 storeDetailsQuorum.put("consensusID", nftDetailsObject.getString("nftHash"));
-                                //modified sign got for nftSign that quorum verfies for nft txn
+                                // modified sign got for nftSign that quorum verfies for nft txn
                                 storeDetailsQuorum.put("sign", nftDetailsObject.getString("nftSign"));
                                 storeDetailsQuorum.put("credits", credit);
                                 storeDetailsQuorum.put("creditHash", calculateHash(credit, "SHA3-256"));
@@ -667,13 +667,13 @@ public class QuorumConsensus implements Runnable {
                             }
 
                         } else {
-                            QuorumConsensusLogger.debug("NFT Sale Contract and Sender signature Authentication Failure - Quorum");
+                            QuorumConsensusLogger
+                                    .debug("NFT Sale Contract and Sender signature Authentication Failure - Quorum");
                             out.println("NFT_Sig_Auth_Failed");
                         }
                     }
 
-                }         
-                else
+                } else
                     QuorumConsensusLogger.debug("Old Credits Mining / Whole RBT Token Transfer");
 
                 String getRecData = null;
@@ -791,7 +791,7 @@ public class QuorumConsensus implements Runnable {
                                         deleteFile(LOGGER_PATH + "consenusIDhash");
                                         QuorumConsensusLogger.debug("added consensus ID " + consenusIDhash);
 
-                                       // Dependency.subscribe(transactionID);
+                                        // Dependency.subscribe(transactionID);
 
                                     }
                                 } else {
@@ -908,14 +908,13 @@ public class QuorumConsensus implements Runnable {
                         QuorumConsensusLogger.debug("Quorum - " + didHash + " is unable to respond!" + getRecData);
                         out.println(getRecData);
                     }
-	                } catch (SocketException e) {
-	                    QuorumConsensusLogger.debug("Sender Input Stream Null - Ping Check / Receiver Details");
-	                    socket.close();
-	                    serverSocket.close();
-	                    executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
-	                }
+                } catch (SocketException e) {
+                    QuorumConsensusLogger.debug("Sender Input Stream Null - Ping Check / Receiver Details");
+                    socket.close();
+                    serverSocket.close();
+                    executeIPFSCommands(" ipfs p2p close -t /p2p/" + senderPID);
                 }
-             catch (IOException e) {
+            } catch (IOException e) {
                 QuorumConsensusLogger.error("IOException Occurred", e);
             } catch (JSONException e) {
                 QuorumConsensusLogger.error("JSONException Occurred", e);
