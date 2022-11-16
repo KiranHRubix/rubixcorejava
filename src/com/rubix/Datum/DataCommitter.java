@@ -122,7 +122,7 @@ public class DataCommitter {
 		int type = detailsObject.getInt("type");
 		String comment = detailsObject.getString("comment");
 
-		String keyPass = detailsObject.getString("pvtKeyPass");
+		/* String keyPass = detailsObject.getString("pvtKeyPass");
 		PrivateKey pvtKey = null;
 		pvtKey = getPvtKey(keyPass, 1);
 
@@ -131,7 +131,7 @@ public class DataCommitter {
 			APIResponse.put("message", "Incorrect password entered for Private Key, cannot proceed with the commit");
 			DataCommitterLogger.warn("Incorrect Private Key password entered");
 			return APIResponse;
-		}
+		} */
 
 		detailsObject.remove("pvtKeyPass");
 
@@ -770,8 +770,8 @@ public class DataCommitter {
 		DataCommitterLogger.debug("Quorum Signatures length " + InitiatorConsensus.quorumSignature.length());
 		String senderSign = getSignFromShares(pvt, authSenderByRecHash);
 
-		String pvtKeyType = privateKeyAlgorithm(1);
-		String senderSignWithPvtKey = pvtKeySign(senderSign, pvtKey, pvtKeyType);
+		/* String pvtKeyType = privateKeyAlgorithm(1);
+		String senderSignWithPvtKey = pvtKeySign(senderSign, pvtKey, pvtKeyType); */
 
 		JSONArray quorumSignatureKeys = InitiatorConsensus.quorumSignature;
 		JSONArray signedQuorumList = new JSONArray();
