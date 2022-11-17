@@ -535,7 +535,7 @@ public class APIHandler {
                 } else if (transactionObject.has("amount"))
                     transactionObject.put("amount", transactionObject.getDouble("amount"));
                 else {
-                    JSONArray tokensArray = new JSONArray(transactionObject.get("tokens"));
+                    JSONArray tokensArray = (JSONArray) transactionObject.get("tokens");
                     transactionObject.put("amount", tokensArray.length());
                 }
 
