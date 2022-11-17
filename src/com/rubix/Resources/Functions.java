@@ -2217,16 +2217,16 @@ public class Functions {
         // FunctionsLogger.debug(blockHashValue);
         String datumFolderPath = DATUM_CHAIN_PATH;
         // quorumLiStrings[] =
-        // getValues(datumFolderPath.concat("datumCommitChain.json"), "quorumList",
+        // getValues(datumFolderPath.concat("datumCommitHistory.json"), "quorumList",
         // "blockHash", blockHash).toArray();
-        transcationID = getValues(datumFolderPath.concat("datumCommitChain.json"), "txn", "blockHash", blockHash);
-        senderDidIpfsHash = getValues(datumFolderPath.concat("datumCommitChain.json"), "senderDID", "blockHash",
+        transcationID = getValues(datumFolderPath.concat("datumCommitHistory.json"), "txn", "blockHash", blockHash);
+        senderDidIpfsHash = getValues(datumFolderPath.concat("datumCommitHistory.json"), "senderDID", "blockHash",
                 blockHash);
-        blockHashFromChainString = getValues(datumFolderPath.concat("datumCommitChain.json"), "blockHash", "blockHash",
+        blockHashFromChainString = getValues(datumFolderPath.concat("datumCommitHistory.json"), "blockHash", "blockHash",
                 blockHash);
 
-        FunctionsLogger.debug("File path is :  " + datumFolderPath.concat("datumCommitChain.json"));
-        File datumCommitChain = new File(datumFolderPath.concat("datumCommitChain.json"));
+        FunctionsLogger.debug("File path is :  " + datumFolderPath.concat("datumCommitHistory.json"));
+        File datumCommitHistory = new File(datumFolderPath.concat("datumCommitHistory.json"));
 
         // FunctionsLogger.debug("quorumLiStrings is "+ quorumLiStrings +"\n
         // transcationID is "+transcationID
@@ -2239,7 +2239,7 @@ public class Functions {
         // APIResponse.put("txn", transcationID);
         // APIResponse.put("Signed Quorums", quorumLiStrings);
 
-        if (getValues(datumFolderPath.concat("datumCommitChain.json"), "blockHash", "blockHash", blockHash)
+        if (getValues(datumFolderPath.concat("datumCommitHistory.json"), "blockHash", "blockHash", blockHash)
                 .equals(blockHash)) {
             FunctionsLogger.debug("BlockHash exists");
             APIResponse.put("did", senderDidIpfsHash);
