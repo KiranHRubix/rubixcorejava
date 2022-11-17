@@ -1189,7 +1189,7 @@ public class NftBuyer {
                 dataToSend.put("totalSupply", nftTokenObject.getLong("totalSupply"));
                 dataToSend.put("editionNumber", nftTokenObject.getLong("tokenCount"));
                 dataToSend.put("rbt_transaction_id", rbtTxnId);
-                dataToSend.put("user_id", detailsObject.get("userHash"));
+                //dataToSend.put("user_id", detailsObject.get("userHash"));
                 String populate = dataToSend.toString();
 
                 JSONObject jsonObject = new JSONObject();
