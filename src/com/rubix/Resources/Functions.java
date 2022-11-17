@@ -2202,8 +2202,64 @@ public class Functions {
         final byte[] hashBytes = digest.digest(messageBytes);
         return bytesToHex(hashBytes);
     }
-
     
+    public static JSONObject verifySpecificCommit(String blockHash) {
+        JSONObject APIResponse = new JSONObject();
+        // String quorumLiStrings[] = null;
+        String transcationID = null;
+        String senderDidIpfsHash = null;
+        String status = null;
+        String blockHashFromChainString = null;
+        FunctionsLogger.debug("data is " + blockHash);
+        PropertyConfigurator.configure(LOGGER_PATH + "log4jWallet.properties");
+        // JSONObject detailsObject = new JSONObject(blockHash);
+        // String blockHashValue = detailsObject.getString("blockHash");
+        // FunctionsLogger.debug(blockHashValue);
+        String datumFolderPath = DATUM_CHAIN_PATH;
+        // quorumLiStrings[] =
+        // getValues(datumFolderPath.concat("datumCommitChain.json"), "quorumList",
+        // "blockHash", blockHash).toArray();
+        transcationID = getValues(datumFolderPath.concat("datumCommitChain.json"), "txn", "blockHash", blockHash);
+        senderDidIpfsHash = getValues(datumFolderPath.concat("datumCommitChain.json"), "senderDID", "blockHash",
+                blockHash);
+        blockHashFromChainString = getValues(datumFolderPath.concat("datumCommitChain.json"), "blockHash", "blockHash",
+                blockHash);
+
+        FunctionsLogger.debug("File path is :  " + datumFolderPath.concat("datumCommitChain.json"));
+        File datumCommitChain = new File(datumFolderPath.concat("datumCommitChain.json"));
+
+        // FunctionsLogger.debug("quorumLiStrings is "+ quorumLiStrings +"\n
+        // transcationID is "+transcationID
+        // + " \n senderDidIpfsHash "+ senderDidIpfsHash + "\n blockHashFromChainString
+        // is "+blockHashFromChainString);
+
+        APIResponse = new JSONObject();
+
+        // FunctionsLogger.debug("detailsObject is "+ detailsObject.toString());
+        // APIResponse.put("txn", transcationID);
+        // APIResponse.put("Signed Quorums", quorumLiStrings);
+
+        if (getValues(datumFolderPath.concat("datumCommitChain.json"), "blockHash", "blockHash", blockHash)
+                .equals(blockHash)) {
+            FunctionsLogger.debug("BlockHash exists");
+            APIResponse.put("did", senderDidIpfsHash);
+            APIResponse.put("tid", transcationID);
+            APIResponse.put("status", "True");
+            // APIResponse.put("Signed Quorums", quorumLiStrings);
+            APIResponse.put("message", "Block Hash verified");
+        } else {
+            FunctionsLogger.debug("BlockHash doesnt exists");
+            APIResponse.put("did", senderDidIpfsHash);
+            APIResponse.put("tid", transcationID);
+            APIResponse.put("status", "False");
+            // APIResponse.put("Signed Quorums", quorumLiStrings);
+            APIResponse.put("message", "Block Hash doesnt exist");
+        }
+        // APIResponse = new JSONObject();
+
+        return APIResponse;
+
+    }
     
 
 }
