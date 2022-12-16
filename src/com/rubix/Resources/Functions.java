@@ -2173,13 +2173,85 @@ public static int calculatePoW() throws IOException, JSONException {
     return workLevel;
 }
 
-
-
-
-
-
-
-    
-    
-    
+public static boolean signChallengePayload(String tid) {
+    File challengeFile = new File(WALLET_DATA_PATH.concat("/ChallengePayload").concat(tid).concat(".json"));
+    if (!challengeFile.exists()) {
+      FunctionsLogger.debug("Challenge Payload file for the txn " + tid + " not found in path " + challengeFile.getAbsolutePath());
+      return false;
+    } 
+    JSONObject challengeObject = new JSONObject(readFile(WALLET_DATA_PATH.concat("/ChallengePayload").concat(tid).concat(".json")));
+    String authSenderByRecHash = challengeObject.getString("authSenderByRecHash");
+    String senderPayloadHash = challengeObject.getString("senderPayloadSign");
+    JSONArray pledgeDetails = challengeObject.getJSONArray("pledgeDetails");
+    JSONArray lastObject = challengeObject.getJSONArray("lastObject");
+    String DID = getNodeDID();
+    String pvt = DATA_PATH.concat(DID).concat("/PrivateShare.png");
+    JSONArray signedChains = new JSONArray();
+    JSONObject payloadSigned = new JSONObject();
+    try {
+      payloadSigned.put("authSenderByRecHash", getSignFromShares(pvt, authSenderByRecHash));
+      payloadSigned.put("senderPayloadSign", getSignFromShares(pvt, senderPayloadHash));
+      for (int i = 0; i < lastObject.length(); i++) {
+        JSONObject object = lastObject.getJSONObject(i);
+        FunctionsLogger.debug(object.toString());
+        String chainSign = getSignFromShares(pvt, object.getString("hash"));
+        object.put("chainSign", chainSign);
+        signedChains.put(object);
+      } 
+      payloadSigned.put("lastObject", signedChains);
+      JSONArray quorumWithSignsArray = new JSONArray();
+      for (int j = 0; j < pledgeDetails.length(); j++) {
+        JSONObject jsonObject = pledgeDetails.getJSONObject(j);
+        Iterator<String> keys = jsonObject.keys();
+        FunctionsLogger.debug("jsonObject  is " + jsonObject.toString());
+        JSONObject pledgeSignedObject = new JSONObject();
+        String key = "";
+        JSONArray hashAndSignsArray = new JSONArray();
+        while (keys.hasNext()) {
+          key = keys.next();
+          FunctionsLogger.debug("key of quorumn is " + key);
+          if (jsonObject.get(key) instanceof JSONArray) {
+            JSONArray hashArray = new JSONArray(jsonObject.get(key).toString());
+            FunctionsLogger.debug("@@@@@ Calculating hash for: " + hashArray);
+            for (int k = 0; k < hashArray.length(); k++) {
+              String sign = getSignFromShares(pvt, hashArray.get(k).toString());
+              pledgeSignedObject.put("hash", hashArray.get(k));
+              pledgeSignedObject.put("sign", sign);
+              hashAndSignsArray.put(pledgeSignedObject);
+            } 
+          } 
+        } 
+        JSONObject signObject = new JSONObject();
+        signObject.put(key, hashAndSignsArray);
+        FunctionsLogger.debug("signObject is " + signObject);
+        quorumWithSignsArray.put(signObject);
+      } 
+      payloadSigned.put("pledgeDetails", quorumWithSignsArray);
+      FileWriter spfile = new FileWriter(WALLET_DATA_PATH.concat("/signedPayload").concat(tid).concat(".json"));
+      spfile.write(payloadSigned.toString());
+      spfile.close();
+    } catch (JSONException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } 
+    File signedPayloadFile = new File(WALLET_DATA_PATH.concat("/signedPayload").concat(tid).concat(".json"));
+    if (!signedPayloadFile.exists())
+      return false; 
+    return true;
+  }
+  
+  public static String getNodeDID() {
+    String filecontent = readFile(String.valueOf(DATA_PATH) + "DID.json");
+    JSONObject object = null;
+    String DID = "";
+    try {
+      JSONArray fileContentArray = new JSONArray(filecontent);
+      object = fileContentArray.getJSONObject(0);
+      DID = object.getString("didHash");
+    } catch (JSONException e1) {
+      e1.printStackTrace();
+    } 
+    return DID;
+  }
 }
